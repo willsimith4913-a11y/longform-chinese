@@ -36,7 +36,27 @@ const WORD_COUNT_REGEX = (() => {
     "g"
   );
 })();
+function countWordsWPS(text: string): number {
+    if (!text) return 0;
 
+    // 1. 匹配所有中文字符和中文全角标点 (CJK 字符及全角符号)
+    // 每一个这样的字符在 WPS 中硬性独立计 1 个字
+    const cjkRegex = /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g;
+    const cjkMatches = text.match(cjkRegex);
+    const cjkCount = cjkMatches ? cjkMatches.length : 0;
+
+    // 2. 将所有中文字符及全角标点暂时替换为半角空格，以便切分非中文连续块
+    const intermediateText = text.replace(/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g, ' ');
+
+    // 3. 匹配所有连续的非空白字符序列（即不包含空格、换行、制表符等）
+    // 这代表了 WPS 逻辑里的“一个非中文单词/数字/半角符号块”
+    const wordRegex = /[^\s]+/g;
+    const wordMatches = intermediateText.match(wordRegex);
+    const wordCount = wordMatches ? wordMatches.length : 0;
+
+    // 总字数 = 中文字符和全角标点总数 + 非中文符号/英文数字块总数
+    return cjkCount + wordCount;
+}
 function countWords(
   text: string,
   removeMarkdown = true,
@@ -57,8 +77,8 @@ function countWords(
       .replace(/<!--.*?-->/gs, "") // HTML comments
       .replace(/%%.*?%%/gs, ""); // Markdown comments
   }
-
-  return (textToCount.match(WORD_COUNT_REGEX) || []).length;
+  return countWordsWPS(text);
+  // return (textToCount.match(WORD_COUNT_REGEX) || []).length;
 }
 
 /**
