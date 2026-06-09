@@ -140,13 +140,13 @@ export class WritingSessionTracker {
 
           let statusBarText = "";
           if (status.scene && status.scene !== status.draft) {
-            statusBarText += `${status.scene.toLocaleString()}w scene/`;
+            statusBarText += `${status.scene.toLocaleString()}字 章节/`;
           }
 
           if (status.draft && status.draft !== status.project) {
             statusBarText += `${status.draft.toLocaleString()}w draft`;
           } else {
-            statusBarText += `${status.project.toLocaleString()}w project`;
+            statusBarText += `${status.project.toLocaleString()}字 项目`;
           }
 
           this.statusBarItem.setText(statusBarText);

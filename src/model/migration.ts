@@ -91,6 +91,7 @@ export async function migrate(settings: LongformPluginSettings, app: App) {
             ignoredFiles: [project.indexFile],
             unknownFiles: [],
             sceneTemplate: null,
+            totalWordNumber:10000
           };
 
           await insertDraftIntoFrontmatter(app, vaultPath, draft);
@@ -132,6 +133,7 @@ export async function migrate(settings: LongformPluginSettings, app: App) {
               ignoredFiles: [],
               unknownFiles: [],
               sceneTemplate: null,
+              totalWordNumber:10000
             };
 
             await insertDraftIntoFrontmatter(app, vaultPath, draft);

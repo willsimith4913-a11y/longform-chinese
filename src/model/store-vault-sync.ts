@@ -450,6 +450,8 @@ export class StoreVaultSync {
     const vaultPath = fileWithMetadata.file.path;
     let title = longformEntry["title"];
     let titleInFrontmatter = true;
+    let totalWordNumber=longformEntry["totalWordNumber"]??10000
+
     if (!title) {
       titleInFrontmatter = false;
       title = fileNameFromPath(vaultPath);
@@ -541,6 +543,7 @@ export class StoreVaultSync {
           unknownFiles,
           sceneTemplate,
           workflow,
+          totalWordNumber
         },
         dirty,
       };
@@ -553,6 +556,7 @@ export class StoreVaultSync {
           draftTitle,
           vaultPath,
           workflow,
+          totalWordNumber:10000
         },
         dirty: false,
       };

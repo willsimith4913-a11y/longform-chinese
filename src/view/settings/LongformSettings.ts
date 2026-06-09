@@ -29,7 +29,7 @@ export class LongformSettingsTab extends PluginSettingTab {
 
   display(): void {
     const settings = get(pluginSettings);
-
+    console.log("setting Value:::::",settings);
     const { containerEl } = this;
 
     containerEl.empty();
@@ -175,6 +175,7 @@ export class LongformSettingsTab extends PluginSettingTab {
           }
         });
       });
+
     new Setting(containerEl)
       .setName("Goal applies to")
       .setDesc(

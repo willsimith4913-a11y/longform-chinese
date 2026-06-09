@@ -58,6 +58,7 @@ export default class NewProjectModalContainer extends Modal {
               ignoredFiles: [],
               unknownFiles: [],
               sceneTemplate: null,
+              totalWordNumber:10000
             };
             return multi;
           } else {
@@ -68,6 +69,7 @@ export default class NewProjectModalContainer extends Modal {
               draftTitle: null,
               vaultPath: path,
               workflow: null,
+              totalWordNumber:10000
             };
             return single;
           }

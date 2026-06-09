@@ -48,6 +48,7 @@ const callbackForFormat = (
         ignoredFiles: [],
         unknownFiles: [],
         sceneTemplate: null,
+        totalWordNumber:10000
       };
       return multi;
     } else {
@@ -58,6 +59,7 @@ const callbackForFormat = (
         draftTitle: null,
         vaultPath: file.path,
         workflow: null,
+        totalWordNumber:10000
       };
       return single;
     }

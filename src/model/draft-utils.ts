@@ -105,6 +105,7 @@ export function setDraftOnFrontmatterObject(
       obj["longform"]["sceneTemplate"] = draft.sceneTemplate;
     }
     obj["longform"]["ignoredFiles"] = draft.ignoredFiles;
+    obj["longform"]["totalWordNumber"] = draft.totalWordNumber;
   }
 }
 

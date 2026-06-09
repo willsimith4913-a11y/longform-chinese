@@ -18,6 +18,7 @@ export type MultipleSceneDraft = {
   ignoredFiles: string[] | null;
   unknownFiles: string[];
   sceneTemplate: string | null;
+  totalWordNumber:number;
 };
 
 export type SingleSceneDraft = {
@@ -27,6 +28,7 @@ export type SingleSceneDraft = {
   draftTitle: string | null;
   vaultPath: string;
   workflow: string | null;
+  totalWordNumber:number;
 };
 
 export type Draft = MultipleSceneDraft | SingleSceneDraft;
@@ -131,7 +133,7 @@ export const DEFAULT_SETTINGS: LongformPluginSettings = {
   projects: {},
   waitForSync: false,
   fallbackWaitEnabled: true,
-  fallbackWaitTime: 5,
+  fallbackWaitTime: 5
 };
 
 export const TRACKED_SETTINGS_PATHS: (keyof LongformPluginSettings)[] = [
@@ -154,7 +156,7 @@ export const TRACKED_SETTINGS_PATHS: (keyof LongformPluginSettings)[] = [
   "waitForSync",
   "fallbackWaitEnabled",
   "fallbackWaitTime",
-  "writeProperty",
+  "writeProperty"
 ];
 
 export const PASSTHROUGH_SAVE_SETTINGS_PATHS: (keyof LongformPluginSettings)[] =

@@ -3,6 +3,7 @@
   import { normalizePath } from "obsidian";
   import { draftForPath, projectFolderPath } from "src/model/scene-navigation";
   import { pluginSettings, projects } from "src/model/stores";
+  import { get } from "svelte/store";
   import {
     drafts,
     selectedDraft,
@@ -20,7 +21,7 @@
   } from "../stores";
   import DraftList from "./DraftList.svelte";
   import { useApp } from "../utils";
-
+const settings=get(pluginSettings);
   const app = useApp();
 
   let showMetdata = true;
@@ -63,6 +64,7 @@
       const projectPath = projectFolderPath($selectedDraft, app.vault);
       new FolderSuggest(app, sceneFolderInput, projectPath);
     }
+    console.log("当前的Draft",$selectedDraft);
   });
 
   async function sceneFolderChanged(event: Event) {
@@ -90,6 +92,7 @@
   }
 
   let sceneTemplateInput: HTMLInputElement;
+  let totalWordNumberInput: HTMLInputElement;
   onMount(() => {
     if (sceneTemplateInput && $selectedDraft.format === "scenes") {
       new FileSuggest(app, sceneTemplateInput);
@@ -121,35 +124,63 @@
       );
     }
   }
+  async function totalWordCountChanged(event: Event) {
+    let totalWordsNumber = (event.target as any).value;
+    if (!$selectedDraft) {
+      return;
+    }
+    if (isNaN(totalWordsNumber) || totalWordsNumber<0) {
+      totalWordsNumber = 0;
+    }
+    drafts.update((_drafts) => {
+      const currentDraftIndex = _drafts.findIndex(
+        (d) => d.vaultPath === $selectedDraftVaultPath
+      );
+      if (currentDraftIndex >= 0) {
+        const currentDraft = _drafts[currentDraftIndex];
+        const currentTitle = currentDraft.title;
 
+        return _drafts.map((d) => {
+          if (d.title === currentTitle) {
+            d.totalWordNumber=totalWordsNumber;
+          }
+          return d;
+        });
+      }
+      return _drafts;
+    });
+
+  }
   let projectCount: number;
   let draftCount: number | null;
   let sceneCount: number | null;
   $: {
     if ($selectedDraftWordCountStatus) {
       const { scene, draft, project } = $selectedDraftWordCountStatus;
-
       projectCount = project;
       draftCount = $projects[$selectedDraft.title].length > 1 ? draft : null;
       sceneCount = $selectedDraft.format === "scenes" ? scene : null;
     }
   }
 
-  let showProgress = false;
-  $: {
-    if ($activeFile && $selectedDraft) {
-      const draft = draftForPath($activeFile.path, $drafts);
-      showProgress = draft && draft.vaultPath === $selectedDraft.vaultPath;
-    }
-  }
+  // let showProgress = false;
+  // $: {
+  //   if ($activeFile && $selectedDraft) {
+  //     const draft = draftForPath($activeFile.path, $drafts);
+  //     showProgress = draft && draft.vaultPath === $selectedDraft.vaultPath;
+  //   }
+  // }
 
-  let goalPercentage: number;
+  let goalPercentage: number ;
   let goalDescription: string;
-  $: {
-    goalPercentage = Math.ceil(Math.min($goalProgress, 1) * 100);
-    goalDescription = `${Math.round(
-      $goalProgress * $pluginSettings.sessionGoal
-    )}/${$pluginSettings.sessionGoal}`;
+  let showProgress = true;
+$:{
+  if ($selectedDraft) {
+    let per = projectCount/$selectedDraft.totalWordNumber;
+    per=per>1?1:per;
+    goalPercentage = Math.ceil(per * 100);
+    goalDescription = `${projectCount}/${$selectedDraft.totalWordNumber}`;
+  }
   }
 
   function pluralize(
@@ -173,6 +204,9 @@
   function onNewDraft() {
     showNewDraftModal();
   }
+
+  // let perResult = getPer();
+
 </script>
 
 <div>
@@ -189,7 +223,7 @@
       </div>
       {#if showMetdata}
         <div>
-          <label for="longform-project-title">Title</label>
+          <label for="longform-project-title">小说标题</label>
           <input
             id="longform-project-title"
             type="text"
@@ -197,7 +231,7 @@
             on:change={titleChanged}
           />
           {#if $selectedDraft.format === "scenes"}
-            <label for="longform-project-scene-folder">Scene Folder</label>
+            <label for="longform-project-scene-folder">章节文件夹</label>
             <input
               id="longform-project-scene-folder"
               type="text"
@@ -210,7 +244,7 @@
               scenes to a new folder, move them in your vault first, then
               change this setting.
             </p>
-            <label for="longform-project-scene-template">Scene Template</label
+            <label for="longform-project-scene-template">章节模板</label
             >
             <input
               id="longform-project-scene-template"
@@ -224,6 +258,18 @@
               via the New Scene… field. If you use a templating plugin
               (Templater or the core plugin) it will be used to process this
               template.
+            </p>
+            <label for="longform-project-scene-template">目标字数</label
+            >
+            <input
+              id="longform-project-scene-template"
+              type="text"
+              value={$selectedDraft.totalWordNumber}
+              bind:this={totalWordNumberInput}
+              on:blur={totalWordCountChanged}
+            />
+            <p class="longform-project-warning">
+            整部小说的完整字数，预设一个，查看完成比例的
             </p>
           {/if}
         </div>
@@ -247,15 +293,6 @@
     </div>
     {#if showWordCount}
       <div>
-        {#if showProgress}
-          <div
-            class="progress"
-            data-label={goalDescription}
-            title={goalDescription}
-          >
-            <div class="value" style={`width:${goalPercentage}%;`} />
-          </div>
-        {/if}
         {#if sceneCount}
           <p title="Word count in this scene of this project.">
             <strong>Scene:</strong>
@@ -268,10 +305,23 @@
             {pluralize(draftCount, "word")}
           </p>
         {/if}
-        <p title="Word count across all drafts of this project.">
+        <p style="line-height: 40px;;" title="Word count across all drafts of this project.">
           <strong>Project:</strong>
           {pluralize(projectCount, "word")}
         </p>
+        {#if showProgress}
+        <div  title="小说总体进度：{goalPercentage}%" style="display: flex;line-height: 40px;margin-top:8px">
+          <strong>完成比例：</strong>
+          <div
+            class="progress"
+            style="flex:1"
+            data-label={goalDescription}
+            title={goalDescription}
+          >
+            <div class="value" style={`width:${goalPercentage}%;background-color:${goalPercentage==100?"#27AE60":"#3498DB"}`} />
+          </div>
+        </div>
+        {/if}
       </div>
     {/if}
   </div>
